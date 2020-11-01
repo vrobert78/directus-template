@@ -1,0 +1,69 @@
+# This file describes an application. You can have multiple applications
+# in the same project.
+#
+# See https://docs.platform.sh/configuration/app.html
+
+# The name of this app. Must be unique within a project.
+name: 'app'
+
+# The runtime the application uses.
+type: 'nodejs:14'
+
+
+# The relationships of the application with services or other applications.
+#
+# The left-hand side is the name of the relationship as it will be exposed
+# to the application in the PLATFORM_RELATIONSHIPS variable. The right-hand
+# side is in the form `<service name>:<endpoint name>`.
+relationships:
+    database: 'db:mysql'
+
+
+# The size of the persistent disk of the application (in MB).
+disk: 2048
+
+# The mounts that will be performed when the package is deployed.
+mounts:
+    "init":
+        source: local
+        source_path: "init"
+    "uploads":
+        source: local
+        source_path: "uploads"
+    "extensions":
+        source: local
+        source_path: "extensions"
+
+# Configuration of the build of this application.
+build:
+    flavor: none
+
+hooks:
+    build: |
+        set -e
+        cd /app
+        npm init -y
+        npm install directus
+        npm install mysql
+
+    deploy: |
+        set -e
+        FILE=/app/init/initialized
+
+        if test -f "$FILE"; then
+            echo "Already initialized"
+        else
+            cd /app
+            npx directus database install
+            ROLE=`npx directus roles create --name admin --admin`
+            npx directus users create --email admin@directus.com --password 123456 --role $ROLE
+            touch $FILE
+        fi
+
+# The configuration of app when it is exposed to the web.
+web:
+    commands:
+        start: npx directus start
+    locations:
+        '/':
+            passthru: true
