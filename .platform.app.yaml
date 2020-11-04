@@ -16,7 +16,7 @@ type: 'nodejs:14'
 # to the application in the PLATFORM_RELATIONSHIPS variable. The right-hand
 # side is in the form `<service name>:<endpoint name>`.
 relationships:
-    database: 'db2:mysql'
+    database: 'db:mysql'
 
 
 # The size of the persistent disk of the application (in MB).
@@ -43,22 +43,24 @@ hooks:
         set -e
         cd /app
         npm init -y
-        npm install directus
+        npm install directus@9.0.0-rc.6
         npm install mysql
 
     deploy: |
-        set -e
-        FILE=/app/init/initialized
-
-        if test -f "$FILE"; then
-            echo "Already initialized"
-        else
+        set +e
+        npx directus database install &>/dev/null
+        if [ "$?" == "0" ] ; then
+            set -e
             cd /app
             npx directus database install
             ROLE=`npx directus roles create --name admin --admin`
             npx directus users create --email admin@directus.com --password 123456 --role $ROLE
-            touch $FILE
+        else
+            set -e
+            echo "Already initialized"
         fi
+        echo "Checking database connection"
+        timeout ${DB_TIMEOUT:-"30"} bash -c 'until nc -z -w 1 "$0" $1; do sleep 1; done' "${DB_HOST}" ${DB_PORT}
 
 # The configuration of app when it is exposed to the web.
 web:
