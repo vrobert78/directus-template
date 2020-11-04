@@ -16,7 +16,7 @@ type: 'nodejs:14'
 # to the application in the PLATFORM_RELATIONSHIPS variable. The right-hand
 # side is in the form `<service name>:<endpoint name>`.
 relationships:
-    database: 'db:mysql'
+    database: 'db2:mysql'
 
 
 # The size of the persistent disk of the application (in MB).
@@ -24,9 +24,6 @@ disk: 2048
 
 # The mounts that will be performed when the package is deployed.
 mounts:
-    "init":
-        source: local
-        source_path: "init"
     "uploads":
         source: local
         source_path: "uploads"
