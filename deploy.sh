@@ -11,7 +11,6 @@ if [ "$?" == "0" ] ; then
     echo "Creating administrator role"
     npx directus users create --email admin@directus.com --password 123456 --role $ROLE
     echo "Creating administrator user"
-    sleep 60
 else
     set -e
     echo "Already initialized"
