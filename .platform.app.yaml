@@ -40,7 +40,7 @@ hooks:
         set -e
         cd /app
         npm init -y
-        npm install directus@9.0.0-rc.6
+        npm install directus@9.0.0-rc.8
         npm install mysql
 
     deploy: |
